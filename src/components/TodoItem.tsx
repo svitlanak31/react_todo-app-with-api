@@ -22,8 +22,10 @@ export const TodoItem: React.FC<TodoItemProps> = ({
   updateTodo,
   setError,
 }) => {
+  const { id, title, completed } = todo;
+
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(todo.title);
+  const [editedTitle, setEditedTitle] = useState(title);
   const [isSaving, setIsSaving] = useState(false);
 
   const renameTodo = async () => {
@@ -38,12 +40,12 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 
     if (trimmedTitle !== todo.title) {
       try {
-        await updateTodo(todo.id, { title: trimmedTitle });
-        const updatedTodo = await Methods.updateTodo(todo.id, {
+        await updateTodo(id, { title: trimmedTitle });
+        const updatedTodo = await Methods.updateTodo(id, {
           title: trimmedTitle,
         });
 
-        updateTodo(todo.id, { title: updatedTodo.title });
+        updateTodo(id, { title: updatedTodo.title });
         setIsEditing(false);
       } catch (error) {
         setError('Unable to update a todo');
@@ -59,8 +61,8 @@ export const TodoItem: React.FC<TodoItemProps> = ({
   const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       if (editedTitle.trim() === '') {
-        deleteTodo(todo.id);
-      } else if (editedTitle !== todo.title) {
+        deleteTodo(id);
+      } else if (editedTitle !== title) {
         renameTodo();
       } else {
         setIsEditing(false);
@@ -68,15 +70,15 @@ export const TodoItem: React.FC<TodoItemProps> = ({
     }
 
     if (e.key === 'Escape') {
-      setEditedTitle(todo.title);
+      setEditedTitle(title);
       setIsEditing(false);
     }
   };
 
   const handleBlur = async () => {
     if (editedTitle.trim() === '') {
-      deleteTodo(todo.id);
-    } else if (editedTitle !== todo.title) {
+      deleteTodo(id);
+    } else if (editedTitle !== title) {
       await renameTodo();
     } else {
       setIsEditing(false);
@@ -86,9 +88,9 @@ export const TodoItem: React.FC<TodoItemProps> = ({
   const toggleTodoStatus = () => {
     setIsSaving(true);
 
-    Methods.updateTodo(todo.id, { completed: !todo.completed })
+    Methods.updateTodo(id, { completed: !completed })
       .then(() => {
-        toggleTodo(todo.id);
+        toggleTodo(id);
       })
       .catch(() => {
         setError('Unable to update a todo');
@@ -100,19 +102,19 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 
   return (
     <div
-      className={classNames('todo', { completed: todo.completed })}
+      className={classNames('todo', { completed: completed })}
       data-cy="Todo"
-      key={todo.id}
+      key={id}
     >
-      <label htmlFor={`todo-status-${todo.id}`} className="todo__status-label">
+      <label htmlFor={`todo-status-${id}`} className="todo__status-label">
         {''}
         <input
-          id={`todo-status-${todo.id}`}
+          id={`todo-status-${id}`}
           data-cy="TodoStatus"
           type="checkbox"
           className="todo__status"
-          checked={todo.completed}
-          onChange={() => toggleTodoStatus()}
+          checked={completed}
+          onChange={toggleTodoStatus}
         />
       </label>
 
@@ -134,7 +136,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
           className="todo__title"
           onDoubleClick={() => setIsEditing(true)}
         >
-          {todo.title}
+          {title}
         </span>
       )}
 
@@ -143,7 +145,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
           type="button"
           className="todo__remove"
           data-cy="TodoDelete"
-          onClick={() => deleteTodo(todo.id)}
+          onClick={() => deleteTodo(id)}
         >
           ×
         </button>
@@ -151,7 +153,7 @@ export const TodoItem: React.FC<TodoItemProps> = ({
 
       <div
         data-cy="TodoLoader"
-        className={`modal overlay ${loadingTodoId === todo.id || isSaving ? 'is-active' : ''}`}
+        className={`modal overlay ${loadingTodoId === id || isSaving ? 'is-active' : ''}`}
       >
         <div className="modal-background has-background-white-ter" />
         <div className="loader" />
